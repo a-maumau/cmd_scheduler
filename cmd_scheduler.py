@@ -114,6 +114,7 @@ class Scheduler:
 		if match_pattern is not None:
 			print("############################")
 			print("que. : in queue number\nNo. : job number, order of push\ngpu : -1 means don't care")
+			print("----------------------------------------")
 			print("que. : No.  | gpu | command")
 			for idx, job in enumerate(self.job_queue):
 				print("{:4} : {:5}|{:5}| {}".format(idx, job.job_num, job.gpu_num, job.cmd))
