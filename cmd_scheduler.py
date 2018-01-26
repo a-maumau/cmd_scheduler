@@ -5,11 +5,12 @@ from datetime import datetime
 from multiprocessing import Process
 from multiprocessing import Pipe
 from multiprocessing import Manager
+
+import subprocess
 from subprocess import Popen
 
 import argparse
 import re
-import subprocess
 
 import arg_parse_pattern
 
@@ -93,7 +94,7 @@ class Scheduler:
 		self.recv_cmd_file = open("{}".format(os.path.join(self.config.save_dir, "recv_cmd_"+self.file_name)), "w")
 
 	def _del_job(self, del_num):
-		if del_num <= len(self.job_number):
+		if del_num <= self.job_number:
 			for que_idx, job in enumerate(self.job_queue):
 				if del_num == job.job_num:
 					self.job_queue.pop(que_idx)
@@ -107,40 +108,49 @@ class Scheduler:
 	def _validate(self, cmd):
 		def _return_message(msg=""):
 			return _SchedulerJobs(msg, -1, 99999, -1)
-		#
+		
+		# check is there @list or @jobs
 		match_pattern = arg_parse_pattern.op_show_jobs.search(cmd)
 		if match_pattern is not None:
+			print("############################")
 			print("que. : in queue number\nNo. : job number, order of push\ngpu : -1 means don't care")
 			print("que. : No.  | gpu | command")
 			for idx, job in enumerate(self.job_queue):
 				print("{:4} : {:5}|{:5}| {}".format(idx, job.job_num, job.gpu_num, job.cmd))
 			return _return_message("")
 
-		#
+		# check is there @del=%d
 		match_pattern = arg_parse_pattern.op_del_job.search(cmd)
 		if match_pattern is not None:
 			del_num = arg_parse_pattern.num.search(match_pattern.group())
 			if del_num is not None:
-				if _del_job(int(del_num.group())):
+				if self._del_job(int(del_num.group())):
 					return _return_message("delete success.")
 				else:
 					return _return_message("cannot delete.")
 			else:
 				return _return_message("@del=NUMBER please.")
 
-		#
+		# init
+		gpu_num = -1
+
+		# check the options
 		match_pattern = arg_parse_pattern.option.search(cmd)
 		if match_pattern is not None:
-			gpu_num = arg_parse_pattern.num(arg_parse_pattern.option_gpu.search((match_pattern.group())).group())
-			if gpu_num is not None:
-				gpu_num = int(gpu_num.group())
-				if gpu_num > self.config.gpus:
-					_return_message("cannot assign that # for GPU.")	
+			# check for gpu option
+			gpu_option = arg_parse_pattern.option_gpu.search(match_pattern.group())
+			if gpu_option is not None:
+				gpu_num = arg_parse_pattern.num.search(gpu_option.group())
+				if gpu_num is not None:
+					gpu_num = int(gpu_num.group())
+					if gpu_num > self.config.gpus:
+						return _return_message("cannot assign that # for GPU.")
+				else:
+					return _return_message("gpu=NUMBER please.")
 			else:
-				return _return_message("gpu=NUMBER please.")
-		else:
-			gpu_num = -1
+				gpu_num = -1
 
+		# check is there a command
 		match_pattern = arg_parse_pattern.command.search(cmd)
 		if match_pattern is not None:
 			cmd_str = match_pattern.group()
@@ -158,11 +168,14 @@ class Scheduler:
 			command = input(">")
 			pars = self._validate(command)
 			if pars.status < 0:
+				if len(pars.cmd) > 0:
+					print(pars.cmd)
 				continue
 
 			self.job_queue.append(pars)
 			self.recv_cmd_file.write("{}\n".format(pars.cmd))
 			self.recv_cmd_file.flush()
+			print("pushed to job queue.")
 
 	def _dispatch(self):
 		dispatched_jobs = [ None for i in range(len(self.subproc_list))]
