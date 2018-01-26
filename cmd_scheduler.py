@@ -165,7 +165,7 @@ class Scheduler:
 
 	def _wait_input(self):
 		while True:
-			command = input(">")
+			command = input(" > ")
 			pars = self._validate(command)
 			if pars.status < 0:
 				if len(pars.cmd) > 0:
