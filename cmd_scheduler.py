@@ -12,6 +12,8 @@ from subprocess import Popen
 import argparse
 import re
 
+import readline, glob
+
 import arg_parse_pattern
 
 _CLOCK = 5 # sec
@@ -178,6 +180,13 @@ class Scheduler:
 		return new_job
 
 	def _wait_input(self):
+		def complete(text, state):
+			return (glob.glob(text+'*')+[None])[state]
+
+		readline.set_completer_delims(' \t\n;')
+		readline.parse_and_bind("tab: complete")
+		readline.set_completer(complete)
+		
 		while True:
 			command = input(" > ")
 			pars = self._validate(command)
@@ -232,7 +241,7 @@ class Scheduler:
 			time_stamp = datetime.now().strftime('%b%d_%H-%M-%S')
 
 			# making path of log file to save log. 
-			save_path = os.path.join(self.config.save_dir, "{}_{}{}{}".format(job.job_num, time_stamp+"_" if job.time_stamp else "", job.save_name, self.config.file_extension))
+			save_path = os.path.join(self.config.save_dir, "job_{}_{}{}{}".format(job.job_num, time_stamp+"_" if job.time_stamp else "", job.save_name, self.config.file_extension))
 			
 			try:
 				# run command and write out to log file.
