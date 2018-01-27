@@ -2,11 +2,10 @@
 **THIS PROGRAM IS NOT SCHEDULING WITH GPU NUMBER.**  
 only associate with which gpu are you going to use.  
 So if you use the parameter of "gpu=#", you need to set the same number in the code.  
-```
-# if you use "gpu=#", you need set assign gpu number.
-pytorch :
-.cuda(#NUMBER) or with torch.cuda.device(#NUMBER):
-```
+  
+if you use "gpu=#", you need set assign gpu number.
+pytorch :  
+`.cuda(#NUMBER)` or `with torch.cuda.device(#NUMBER):`  
 
 # Usage
 ```
