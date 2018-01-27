@@ -17,7 +17,8 @@ python cmd_scheduler.py
 if you run this script, you can use some commands to control the queue  
   
 @list        : shows the list of job in queue.  
-@del=job_num : delete the job witch has a job number of "job_num"  
+@fin         : shows the list of finished jobs.
+@del=job_num : delete the job witch has a job number of "job_num".  
   
 example:  
 ```

@@ -87,6 +87,7 @@ class Scheduler:
 
 		self.manager = Manager()
 		self.job_queue = self.manager.list()
+		self.job_fin_list = self.manager.list()
 
 		self.dispatcher = Process(target=self._dispatch, args=())
 		self.dispatcher.start()
@@ -114,10 +115,22 @@ class Scheduler:
 		if match_pattern is not None:
 			print("############################")
 			print("que. : queue number.\nNo.  : job number in pushed order.\ngpu  : -1 means don't care what # of gpu to use.")
+			print("waiting job list")
 			print("----------------------------------------")
 			print("que. : No.  | gpu | command")
 			for idx, job in enumerate(self.job_queue):
 				print("{:4} : {:5}|{:5}| {}".format(idx, job.job_num, job.gpu_num, job.cmd))
+			return _return_message("")
+
+		# check is there @fin
+		match_pattern = arg_parse_pattern.op_show_fin.search(cmd)
+		if match_pattern is not None:
+			print("############################")
+			print("finished job list")
+			print("----------------------------------------")
+			print("No.  | gpu | command")
+			for job in self.job_fin_list:
+				print("{:5}|{:5}| {}".format(job.job_num, job.gpu_num, job.cmd))
 			return _return_message("")
 
 		# check is there @del=%d
@@ -144,7 +157,7 @@ class Scheduler:
 				gpu_num = arg_parse_pattern.num.search(gpu_option.group())
 				if gpu_num is not None:
 					gpu_num = int(gpu_num.group())
-					if gpu_num > self.config.gpus:
+					if gpu_num >= self.config.gpus:
 						return _return_message("cannot assign that # for GPU.")
 				else:
 					return _return_message("gpu=NUMBER please.")
@@ -187,6 +200,7 @@ class Scheduler:
 						if dispatched_jobs[id_num] is not None:
 							fin_cmd_file.write("{}\n".format(dispatched_jobs[id_num].cmd))
 							fin_cmd_file.flush()
+							self.job_fin_list.append(dispatched_jobs[id_num])
 							dispatched_jobs[id_num] = None
 
 						for job_queue_num, job in enumerate(self.job_queue):
@@ -204,7 +218,7 @@ class Scheduler:
 			it is not thought to be stop in the middle of calculating.
 		"""
 		while True:
-			child_pipe.send("ready")
+			child_pipe.send("ready_id_{}".format(id_num))
 			# fetch job
 			job = child_pipe.recv()
 			# checj job status for halting.
