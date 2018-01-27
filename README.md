@@ -12,8 +12,8 @@ pytorch :
 python cmd_scheduler.py
 ```  
 options:  
-    --save_dir  
-    --gpus  
+	  --save_dir  
+	  --gpus  
   
 # Commands  
 if you run this script, you can use some commands to control the queue  
