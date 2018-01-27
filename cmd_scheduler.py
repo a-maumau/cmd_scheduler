@@ -113,7 +113,7 @@ class Scheduler:
 		match_pattern = arg_parse_pattern.op_show_jobs.search(cmd)
 		if match_pattern is not None:
 			print("############################")
-			print("que. : in queue number\nNo. : job number, order of push\ngpu : -1 means don't care")
+			print("que. : queue number.\nNo.  : job number in pushed order.\ngpu  : -1 means don't care what # of gpu to use.")
 			print("----------------------------------------")
 			print("que. : No.  | gpu | command")
 			for idx, job in enumerate(self.job_queue):
