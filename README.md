@@ -1,15 +1,14 @@
 # Note
 THIS PROGRAM IS NOT SCHEDULING WITH GPU NUMBER.  
 only associate with which gpu are you going to use.  
-So if you use the parameter of "gpu=#", you need to set the same number in the code.
-example:
+So if you use the parameter of "gpu=#", you need to set the same number in the code.  
 ```
 # if you use "gpu=#", you need set assign gpu number.
 pytorch :
 .cuda(#NUMBER) or with torch.cuda.device(#NUMBER):
 ```
 
-# Usage  
+# Usage
 ```
 python cmd_scheduler.py
 ```  
@@ -33,7 +32,7 @@ que. : No.  | gpu | command
    2 :     3|    0| @[gpu=0] python test_sleep.py
 ```
 
-# Parameter  
+# Parameter
 order of "@[parameters] command" should be kept  
   
 gpu=num  : use gpu that is assigned "num" in the system  
